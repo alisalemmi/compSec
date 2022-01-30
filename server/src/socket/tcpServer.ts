@@ -1,4 +1,5 @@
 import { AddressInfo, createServer, Server, Socket } from 'net';
+import { AppError } from '../util/appError';
 import { TcpClientHandler } from './tcpClientHandler';
 
 export class TcpServer {
@@ -37,13 +38,26 @@ export class TcpServer {
 
     // log events
     console.log(`connect ${address}`);
-    client.on('close', () => console.log(`close ${address}`));
+    client.on('close', () => console.log(`close   ${address}`));
     client.on('timeout', () => console.log('Client time out'));
     client.on('error', err => this.onError(err));
 
     // handle request
     const clientHandler = new TcpClientHandler(client);
 
-    client.on('data', data => clientHandler.handle(data));
+    client.on('data', (data: string) => {
+      try {
+        clientHandler.handle(data);
+      } catch (error) {
+        this.sendError(client, error);
+      }
+    });
+  }
+
+  private sendError(client: Socket, error: unknown): void {
+    const message =
+      error instanceof AppError ? error.message : 'an error has been occurred';
+
+    client.end(`Error: ${message}\n`);
   }
 }
