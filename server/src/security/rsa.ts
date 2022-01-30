@@ -33,7 +33,8 @@ export class RSA {
   }
 
   decrypt(cipher: string | Buffer): Buffer {
-    const buffer = typeof cipher === 'string' ? Buffer.from(cipher) : cipher;
+    const buffer =
+      typeof cipher === 'string' ? Buffer.from(cipher, 'base64') : cipher;
 
     return privateDecrypt(this.privateKey, buffer);
   }
