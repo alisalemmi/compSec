@@ -34,6 +34,11 @@ class KeyExchangeProtocol
     return this.serverRsa.encrypt((this.nonceB + 1).ToString());
   }
 
+  public string getSessionKey(string data)
+  {
+    return this.clientRsa.decrypt(data);
+  }
+
   private uint generateNonce()
   {
     byte[] buffer = new byte[sizeof(uint)];
