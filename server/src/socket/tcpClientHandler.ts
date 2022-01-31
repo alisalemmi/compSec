@@ -1,5 +1,6 @@
 import { Socket } from 'net';
 import { KeyExchangeProtcol } from '../protocol/keyExchangeProtcol';
+import { AppError } from '../util/appError';
 import { ClientStep } from './clientStep.enum';
 
 export class TcpClientHandler {
@@ -12,11 +13,21 @@ export class TcpClientHandler {
     switch (this.step) {
       case ClientStep.Handshake: {
         const res = this.keyExchangeProtcol.handle(data);
-        this.client.write(res.message);
+        this.sendMessage(res.message);
 
-        if (res.completed) this.step = ClientStep.Authenticate;
+        if (res.completed) {
+          this.step = ClientStep.Authenticate;
+          delete this.keyExchangeProtcol;
+        }
         break;
       }
+
+      default:
+        throw new AppError('unknown key exchange step');
     }
+  }
+
+  private sendMessage(message: string): void {
+    this.client.write(`${message}\n`);
   }
 }

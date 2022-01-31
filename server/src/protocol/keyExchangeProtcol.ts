@@ -13,9 +13,11 @@ export class KeyExchangeProtcol {
   private nonceB: number;
 
   handle(data: string) {
+    const args = data.trim().split('.');
+
     switch (this.step) {
       case KeyExchangeStep.StartHandshake: {
-        this.startHandshake(data);
+        this.startHandshake(args);
         const message = this.verifyServer();
 
         this.step = KeyExchangeStep.VerifyClient;
@@ -25,15 +27,17 @@ export class KeyExchangeProtcol {
           completed: false
         };
       }
+
+      default:
+        throw new AppError('unknown key exchange step');
     }
   }
 
-  private startHandshake(data: string) {
-    const args = data.split('.');
+  private startHandshake(args: string[]): void {
     if (args.length !== 2) throw new AppError('bad arguments');
 
     this.nonceA = this.decryptNonce(args[0]);
-    this.clientPublicKey = args[1].trim();
+    this.clientPublicKey = args[1];
   }
 
   private verifyServer(): string {
