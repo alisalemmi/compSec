@@ -29,6 +29,11 @@ class KeyExchangeProtocol
       throw new Exception("invalid signature");
   }
 
+  public string verifyClient()
+  {
+    return this.serverRsa.encrypt((this.nonceB + 1).ToString());
+  }
+
   private uint generateNonce()
   {
     byte[] buffer = new byte[sizeof(uint)];
