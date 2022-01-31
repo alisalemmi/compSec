@@ -1,11 +1,13 @@
 import { Socket } from 'net';
 import { KeyExchangeProtcol } from '../protocol/keyExchangeProtcol';
+import { AES } from '../security/aes';
 import { AppError } from '../util/appError';
 import { ClientStep } from './clientStep.enum';
 
 export class TcpClientHandler {
   private keyExchangeProtcol = new KeyExchangeProtcol();
   private step = ClientStep.Handshake;
+  private sessionKey: AES;
 
   constructor(private client: Socket) {}
 
@@ -17,8 +19,13 @@ export class TcpClientHandler {
 
         if (res.completed) {
           this.step = ClientStep.Authenticate;
+          this.sessionKey = res.sessionKey;
           delete this.keyExchangeProtcol;
         }
+        break;
+      }
+
+      case ClientStep.Authenticate: {
         break;
       }
 

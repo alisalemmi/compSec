@@ -1,4 +1,5 @@
 import { createPublicKey, KeyObject, randomBytes } from 'crypto';
+import { AES } from '../security/aes';
 import { MD5 } from '../security/md5';
 import { RSA } from '../security/rsa';
 import { AppError } from '../util/appError';
@@ -25,6 +26,17 @@ export class KeyExchangeProtcol {
         return {
           message,
           completed: false
+        };
+      }
+
+      case KeyExchangeStep.VerifyClient: {
+        this.verifyClient(args);
+        const sessionKey = new AES();
+
+        return {
+          message: this.encryptSessionKey(sessionKey),
+          completed: true,
+          sessionKey
         };
       }
 
@@ -56,6 +68,18 @@ export class KeyExchangeProtcol {
     const signedMessage = this.rsa.sign(`${hashNonceB}.${hashPublicKey}`);
 
     return `${na}.${nb}.${signedMessage}`;
+  }
+
+  private verifyClient(args: string[]): void {
+    if (args.length !== 1) throw new AppError('bad arguments');
+
+    const nonceB = this.decryptNonce(args[0]);
+
+    if (nonceB !== this.nonceB + 1) throw new AppError('mismatch nonce');
+  }
+
+  private encryptSessionKey(sessionKey: AES): string {
+    return this.rsa.encrypt(sessionKey.key, this._clientPublicKey);
   }
 
   private decryptNonce(encryptedNonce: string): number {
