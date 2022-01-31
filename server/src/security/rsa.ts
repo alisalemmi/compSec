@@ -25,22 +25,21 @@ export class RSA {
     );
   }
 
-  encrypt(plain: string | Buffer, publicKey?: KeyObject): string {
+  encrypt(plain: string, publicKey?: KeyObject): string {
     const key = publicKey ? publicKey : this.publicKey;
-    const buffer = typeof plain === 'string' ? Buffer.from(plain) : plain;
+    const buffer = Buffer.from(plain);
 
     return publicEncrypt(key, buffer).toString('base64');
   }
 
-  decrypt(cipher: string | Buffer): string {
-    const buffer =
-      typeof cipher === 'string' ? Buffer.from(cipher, 'base64') : cipher;
+  decrypt(cipher: string): string {
+    const buffer = Buffer.from(cipher, 'base64');
 
     return privateDecrypt(this.privateKey, buffer).toString();
   }
 
-  sign(plain: string | Buffer): string {
-    const buffer = typeof plain === 'string' ? Buffer.from(plain) : plain;
+  sign(plain: string): string {
+    const buffer = Buffer.from(plain);
 
     return privateEncrypt(this.privateKey, buffer).toString('base64');
   }
