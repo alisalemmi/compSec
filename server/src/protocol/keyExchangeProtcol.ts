@@ -43,20 +43,17 @@ export class KeyExchangeProtcol {
   private verifyServer(): string {
     this.nonceB = this.generateNonce();
 
-    const na = this.rsa
-      .encrypt((this.nonceA + 1).toString(), this._clientPublicKey)
-      .toString('base64');
+    const na = this.rsa.encrypt(
+      (this.nonceA + 1).toString(),
+      this._clientPublicKey
+    );
 
-    const nb = this.rsa
-      .encrypt(this.nonceB.toString(), this._clientPublicKey)
-      .toString('base64');
+    const nb = this.rsa.encrypt(this.nonceB.toString(), this._clientPublicKey);
 
     const hashNonceB = MD5.hash(this.nonceB.toString());
     const hashPublicKey = MD5.hash(this.clientPublicKey);
 
-    const signedMessage = this.rsa
-      .sign(`${hashNonceB}.${hashPublicKey}`)
-      .toString('base64');
+    const signedMessage = this.rsa.sign(`${hashNonceB}.${hashPublicKey}`);
 
     return `${na}.${nb}.${signedMessage}`;
   }
@@ -65,7 +62,7 @@ export class KeyExchangeProtcol {
     let nonce: string;
 
     try {
-      nonce = this.rsa.decrypt(encryptedNonce).toString();
+      nonce = this.rsa.decrypt(encryptedNonce);
     } catch {
       nonce = '';
     }
