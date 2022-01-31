@@ -1,16 +1,32 @@
 using System.Security.Cryptography;
-using System.Text;
+using System.Text.RegularExpressions;
 
 class RSA
 {
-  private RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-  private UnicodeEncoding ByteConverter = new UnicodeEncoding();
+  private RSACryptoServiceProvider rsa;
+
+  public RSA()
+  {
+    this.rsa = new RSACryptoServiceProvider();
+  }
+
+  public RSA(string publicKeyPath)
+  {
+    Regex regex = new Regex("-----(BEGIN|END) RSA PUBLIC KEY-----");
+
+    string publicKeyFile = File.ReadAllText("../server/key/public.pem").Trim();
+    string publicKey = regex.Replace(publicKeyFile, "").Replace("\n", "").Trim();
+    byte[] publicKeyByte = Convert.FromBase64String(publicKey);
+
+    this.rsa = new RSACryptoServiceProvider();
+    rsa.ImportRSAPublicKey(new ReadOnlySpan<byte>(publicKeyByte), out var bytesRead);
+  }
 
   public string publicKey => Convert.ToBase64String(this.rsa.ExportRSAPublicKey());
 
   public string encrypt(string plain)
   {
-    byte[] bytes = this.ByteConverter.GetBytes(plain);
+    byte[] bytes = System.Text.Encoding.UTF8.GetBytes(plain);
     byte[] cipher = rsa.Encrypt(bytes, true);
 
     return Convert.ToBase64String(cipher);
@@ -21,6 +37,6 @@ class RSA
     byte[] bytes = Convert.FromBase64String(cipher);
     byte[] plain = rsa.Decrypt(bytes, true);
 
-    return this.ByteConverter.GetString(plain);
+    return System.Text.Encoding.UTF8.GetString(plain);
   }
 }
