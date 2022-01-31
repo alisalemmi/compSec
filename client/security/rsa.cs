@@ -39,4 +39,17 @@ class RSA
 
     return System.Text.Encoding.UTF8.GetString(plain);
   }
+
+  public bool verify(string sign, string data)
+  {
+    byte[] signBytes = Convert.FromBase64String(sign);
+    byte[] dataBytes = System.Text.Encoding.UTF8.GetBytes(data);
+
+    var hash = CryptoConfig.MapNameToOID("SHA256");
+
+    if (hash != null)
+      return this.rsa.VerifyData(dataBytes, hash, signBytes);
+    else
+      throw new Exception("invalid hash alg");
+  }
 }
