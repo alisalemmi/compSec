@@ -1,6 +1,5 @@
 import { createPublicKey, KeyObject, randomBytes } from 'crypto';
 import { AES } from '../security/aes';
-import { MD5 } from '../security/md5';
 import { RSA } from '../security/rsa';
 import { AppError } from '../util/appError';
 import { KeyExchangeStep } from './keyExchangeStep.enum';
@@ -62,10 +61,9 @@ export class KeyExchangeProtcol {
 
     const nb = this.rsa.encrypt(this.nonceB.toString(), this._clientPublicKey);
 
-    const hashNonceB = MD5.hash(this.nonceB.toString());
-    const hashPublicKey = MD5.hash(this.clientPublicKey);
-
-    const signedMessage = this.rsa.sign(`${hashNonceB}.${hashPublicKey}`);
+    const signedMessage = this.rsa.sign(
+      `${this.nonceB}.${this.clientPublicKey}`
+    );
 
     return `${na}.${nb}.${signedMessage}`;
   }

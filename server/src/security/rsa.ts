@@ -3,10 +3,10 @@ import { readFileSync } from 'fs';
 import {
   createPublicKey,
   createPrivateKey,
+  createSign,
   KeyObject,
   publicEncrypt,
-  privateDecrypt,
-  privateEncrypt
+  privateDecrypt
 } from 'crypto';
 
 export class RSA {
@@ -39,8 +39,9 @@ export class RSA {
   }
 
   sign(plain: string): string {
-    const buffer = Buffer.from(plain);
+    const sign = createSign('SHA256');
+    sign.update(plain).end();
 
-    return privateEncrypt(this.privateKey, buffer).toString('base64');
+    return sign.sign(this.privateKey).toString('base64');
   }
 }
